@@ -1,62 +1,74 @@
 package main
 
 import (
+	"math"
 	"testing"
 )
 
-// TestGenerateRandomElements checks what happens if you pass 0 elements and what will happen if I transfer 10 elements normally
+// TestGenerateRandomElements according to comments, corrected: made a table test and edge cases
 func TestGenerateRandomElements(t *testing.T) {
-	_, err := generateRandomElements(0)
-	if err == nil {
-		t.Error("Expected error for size = 0")
+	tests := []struct {
+		name     string
+		size     int
+		expected int
+	}{
+		{"Zero size", 0, 0},
+		{"Small size", 10, 10},
+		{"Large size", 1000, 1000},
 	}
 
-	data, err := generateRandomElements(10)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	if len(data) != 10 {
-		t.Errorf("Expected length 10, got %d", len(data))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data := generateRandomElements(tt.size)
+			if len(data) != tt.expected {
+				t.Errorf("expected length %d, got %d", tt.expected, len(data))
+			}
+		})
 	}
 }
 
-// TestMaximum checks for empty array protection, then checks for a single number array (minimum possible not empty), checks an array of multiple elements
+// TestMaximum according to comments, corrected: made a table test and edge cases
 func TestMaximum(t *testing.T) {
-	_, err := maximum([]int{})
-	if err == nil {
-		t.Error("Expected error for empty slice")
+	tests := []struct {
+		name     string
+		data     []int
+		expected int
+	}{
+		{"One element", []int{42}, 42},
+		{"Max at end", []int{1, 2, 3, 10}, 10},
+		{"Max at start", []int{100, 1, 2, 3}, 100},
+		{"Max in middle", []int{1, 50, 2, 3}, 50},
+		{"With MaxInt64", []int{1, 2, math.MaxInt64}, math.MaxInt64},
 	}
 
-	value, err := maximum([]int{42})
-	if err != nil || value != 42 {
-		t.Errorf("Expected 42, got %d (err: %v)", value, err)
-	}
-
-	value, _ = maximum([]int{1, 3, 2, 10, 5})
-	if value != 10 {
-		t.Errorf("Expected 10, got %d", value)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := maximum(tt.data)
+			if result != tt.expected {
+				t.Errorf("expected %d, got %d", tt.expected, result)
+			}
+		})
 	}
 }
 
-// TestMaxChunks checks for an error when passing an empty slice, that the array has fewer chunks than the number of threads, normal operation with an array of 8 elements
+// TestMaxChunks according to comments, corrected: made a table test and edge cases
 func TestMaxChunks(t *testing.T) {
-	_, err := maxChunks([]int{})
-	if err == nil {
-		t.Error("Expected error for empty slice")
+	tests := []struct {
+		name     string
+		data     []int
+		expected int
+	}{
+		{"Exact CHUNKS", []int{1, 2, 3, 4, 5, 6, 100, 8}, 100},
+		{"Large max at start", []int{math.MaxInt64, 1, 2, 3, 4, 5, 6, 7}, math.MaxInt64},
+		{"Large max at end", []int{1, 2, 3, 4, 5, 6, 7, math.MaxInt64}, math.MaxInt64},
 	}
 
-	small := make([]int, CHUNKS-1)
-	_, err = maxChunks(small)
-	if err == nil {
-		t.Error("Expected error for too small slice")
-	}
-
-	data := []int{1, 2, 3, 4, 5, 100, 10, 8}
-	result, err := maxChunks(data)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	if result != 100 {
-		t.Errorf("Expected 100, got %d", result)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := maxChunks(tt.data)
+			if result != tt.expected {
+				t.Errorf("expected %d, got %d", tt.expected, result)
+			}
+		})
 	}
 }
